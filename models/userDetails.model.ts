@@ -1,11 +1,12 @@
 import { Document, Schema, model,models } from 'mongoose';
-import{UserDocument} from "./user.model"
+import { IUser } from '../interface';
 // Define the user interface
 interface IUserDetails extends Document {
    
-    userId: UserDocument['_id'];
+    userId: IUser['_id'];
     qualification:string;
     branch:string;
+    
    
 }
 

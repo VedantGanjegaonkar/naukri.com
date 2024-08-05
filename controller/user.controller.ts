@@ -1,44 +1,48 @@
-import { Request, Response } from 'express';
-import { UserDocument, UserModel } from '../models/user.model';
-import {RecruterModel} from '../models/recruterDetails.model';
-import { UserDetailsModel } from '../models/userDetails.model';
-import bcrypt from 'bcrypt';
+import { Request, Response,NextFunction } from 'express';
+import { IUser } from '../interface';
+import { errorHandler } from '../middleware/errorhandler';
+import { inject } from 'inversify';
+import { controller, httpPost, next } from 'inversify-express-utils';
+import { TYPES } from '../types';
+import { UserService } from '../services/user.services';
 
+
+
+@controller('/user')
 export class UserController {
+    
+
+    constructor(@inject(TYPES.UserService) private readonly _userService: UserService) {}
+
+    @httpPost('/signup')
     public async signup(req: Request, res: Response): Promise<void> {
-        const { username, email, password, role } = req.body;
+        const { username, email, password, role,company,branch,qualification } = req.body;
+        const createUserParams = { username, email, password, role,company,branch,qualification  };
 
         try {
-            // Check if the user already exists
-            const existingUser = await UserModel.findOne({ email });
-            if (existingUser) {
-                res.status(400).json({ message: 'User already exists' });
-                return;
-            }
+         const user=await this._userService.createUser(createUserParams)
+            
 
-            // Hash the password
-            const hashedPassword = await bcrypt.hash(password,10);
+        res.status(201).json({ message: 'User created successfully', user });
+        } catch (error:any) {
+           errorHandler(error,req,res,next)
+        }
+    }
 
-            // Create the user based on the role
-    
-            const user = new UserModel({ username, email, password: hashedPassword, role });
-            await user.save();
+    @httpPost('/login')
+    public async login(req: Request, res: Response, next:NextFunction): Promise<void> {
+        try {
+            const { email, password } = req.body;
 
-            if (role === 'recruiter') {
-                console.log("hello recruiter");
-                console.log (user._id.toString());
-                
-                await RecruterModel.create({ userId: user._id.toString(), company: req.body.company });
-            } else {
-                console.log("hello user");
-                
-                await UserDetailsModel.create({ userId: user._id.toString(), qualification: req.body.qualification, branch:req.body.branch });
-            }
+            const user = await this._userService.findUserByEmail(email);
+          
+            await this._userService.validatePassword(password, user.password);
+            
+            const token = this._userService.generateAuthToken(user._id.toString(), user.role);
 
-            res.status(201).json({ message: 'User created successfully', user });
-        } catch (error) {
-            console.error(error);
-            res.status(500).json({ message: 'Internal server error' });
+            res.status(200).json({ message: 'Login successful', token });
+        } catch (err: any) {
+            errorHandler(err,req,res,next)
         }
     }
 }

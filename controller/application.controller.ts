@@ -1,25 +1,36 @@
 import { Request, Response, NextFunction } from 'express';
 import { Application,JobPost } from '../models/jobPost.model';
-import { UserModel } from '../models/user.model';
+import { User } from '../models/user.model';
 import { Types } from 'mongoose';
 import { AppError } from '../utils/errors'; 
+import { controller, httpPost } from 'inversify-express-utils';
+import { inject } from 'inversify';
+import { TYPES } from '../types';
+import { UserService } from '../services/user.services';
 
+
+@controller('/apply')   
 export class ApplicationController{
 
-    
+  constructor(@inject(TYPES.UserService) private readonly _userService:UserService){}
+
+
+@httpPost('/:id') 
 public async applyForJobPost(req: Request, res: Response, next: NextFunction){
     try {
       const jobPostId = req.params.id;
-      const { userId, resume} = req.body;
+      const authHeader = req.headers['authorization'];
+      const userID= await this._userService.getUserId(authHeader)
+      const {resume} = req.body;
       
         
       // Validate user
-      const user = await UserModel.findById(userId);
+      const user = await User.findById(userID);
       if (!user) {
         throw new AppError('User not found', 404);
       }
 
-      console.log(jobPostId);
+      //console.log(jobPostId);
       
   
       // Validate job post
@@ -30,7 +41,7 @@ public async applyForJobPost(req: Request, res: Response, next: NextFunction){
       
       // Create new application
       const newApplication = new Application({
-        applicant: userId,
+        applicant: userID,
         resume,
       });
   

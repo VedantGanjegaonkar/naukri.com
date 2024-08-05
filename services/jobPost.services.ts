@@ -1,7 +1,7 @@
 import {JobPost,IJobPost} from '../models/jobPost.model';
 import { Schema, model, Document, Types } from 'mongoose';
 import{ValidationError,NotFoundError} from "../utils/errors"
-
+import { inject, injectable } from 'inversify';
 
 interface JobPostData {
   title: string;
@@ -16,6 +16,7 @@ interface JobPostData {
   branch: string;
 }
 
+@injectable()
 export class JobPostServices{
 
 
@@ -59,6 +60,22 @@ public async createJobPost(jobPostData: JobPostData):Promise<IJobPost>{
     }
 
     await JobPost.findByIdAndDelete(jobPostId)
+
+  }
+  public async getAllJobs():Promise<IJobPost[]>{
+
+    const jobs=await JobPost.find({})
+    return jobs
+
+  }
+
+  public async viewDetailPost(id:string):Promise<IJobPost>{
+
+    const job=await JobPost.findById({_id:id})
+    if(!job){
+      throw new NotFoundError('Job post not found')
+    }
+    return job
 
   }
   

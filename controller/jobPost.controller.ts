@@ -2,18 +2,18 @@ import { Request, Response, NextFunction} from 'express';
 import {JobPost,IJobPost} from '../models/jobPost.model';
 import { JobPostServices } from '../services/jobPost.services';
 import{errorHandler} from "../middleware/errorhandler"
+import { inject } from 'inversify';
+import { TYPES } from '../types';
+import { controller, httpDelete, httpGet, httpPost } from 'inversify-express-utils';
+
+@controller('/jobPost')
 
 export class jobPostController{
 
-    private jobPostServices:JobPostServices;
+    constructor(@inject(TYPES.JobPostServices) private readonly jobPostServices: JobPostServices ){}
 
-    constructor(){
-        this.jobPostServices=new JobPostServices()
 
-        this.createJobPost=this.createJobPost.bind(this)
-        this.deleteJobPost=this.deleteJobPost.bind(this)
-    }
-    
+@httpPost('/')
 public async createJobPost(req: Request, res: Response, next:NextFunction): Promise<void>{
     try {
         const jobPostData = req.body;
@@ -26,7 +26,8 @@ public async createJobPost(req: Request, res: Response, next:NextFunction): Prom
       errorHandler(err,req,res,next)
     }
   };
-
+  
+@httpDelete('/')
 public async deleteJobPost(req: Request, res: Response, next:NextFunction):Promise<void>{
     try {
 
@@ -40,5 +41,34 @@ public async deleteJobPost(req: Request, res: Response, next:NextFunction):Promi
         errorHandler(err,req,res,next)
     }
 }
+@httpGet('/')
+public async getAllJobs(req: Request, res: Response, next:NextFunction):Promise<void>{
+    try {
+
+        const jobPosts=await this.jobPostServices.getAllJobs()
+        
+        
+        res.status(200).json(jobPosts);
+        
+    } catch (err:any) {
+        errorHandler(err,req,res,next)
+    }
+}
+
+@httpGet('/:id')
+public async getpost(req: Request, res: Response, next:NextFunction):Promise<void>{
+    try {
+        const{id}=req.params
+
+        const jobPost=await this.jobPostServices.viewDetailPost(id)
+        res.status(200).json(jobPost);
+        
+    } catch (err:any) {
+        errorHandler(err,req,res,next)
+    }
+}
+
+
+
 }
 

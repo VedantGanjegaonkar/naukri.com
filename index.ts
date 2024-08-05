@@ -1,37 +1,28 @@
-import express from 'express';
+import 'reflect-metadata';
+import * as express from 'express';
 import mongoose from 'mongoose';
+import * as cors from 'cors';
+import { InversifyExpressServer } from 'inversify-express-utils';
+import { container } from './inversify.config';
 
-import userRoutes from "./routes/user.routes"
-import jobPostRoutes from "./routes/jobPost.routes"
-import applyRoutes from "./routes/apply.routes"
-
-const app = express()
 const port = 3000
 
-//middlewares
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
+mongoose.connect('mongodb+srv://vedantsg112233:MzUFmOl5GA6oCL77@cluster0.rfaqwkb.mongodb.net/naukri_lite?retryWrites=true&w=majority&appName=Cluster0')
+  .then(() => {
+    console.log('connected to DB');
+  });
 
+  const server = new InversifyExpressServer(container)
 
-//routes
-app.use("/user",userRoutes)
-app.use("/jobs",jobPostRoutes)
-app.use("/apply",applyRoutes)
+  server.setConfig((app)=>{
+    app.use(express.json());
+    app.use(express.urlencoded({ extended: true }));
+    app.use(cors());
+  })
 
+  const app = server.build();
 
-
-app.get('/', (req, res) => {
-  res.send('welcome to naukri.com lite')
-})
-
-
-
-
-
-mongoose.connect("mongodb://localhost:27017/naukri")
-.then(()=>{
-    console.log("connected to DB");
-})
-app.listen(port, () => {
-  console.log(`Example app listening on port ${port}`)
-})
+  app.listen(port, () => {
+    console.log(`Server is listening on port ${port}`);
+  });
+  

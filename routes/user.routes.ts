@@ -1,12 +1,12 @@
 
-import { Router } from 'express';
-import { Request, Response, NextFunction } from 'express';
-import { UserController} from '../controller/user.controller';
+// import { Router } from 'express';
+// import { Request, Response, NextFunction } from 'express';
+// import { UserController} from '../controller/user.controller';
 
-const userController = new UserController();
+// const userController = new UserController();
 
-const router = Router();
+// const router = Router();
 
-router.post('/signup', userController.signup);
+// router.post('/signup', userController.signup);
 
-export default router
+// export default router
