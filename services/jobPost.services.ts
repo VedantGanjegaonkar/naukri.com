@@ -55,14 +55,12 @@ public async createJobPost(jobPostData: JobPostData):Promise<IJobPost>{
     console.log(deletedJobPost);
     
     if (!deletedJobPost) {
-      throw new NotFoundError('Job post not found');
+      throw new NotFoundError('Job post not found to delete');
     }
 
     await JobPost.findByIdAndDelete(jobPostId)
 
   }
   
-
-
 
 }

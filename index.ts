@@ -3,7 +3,7 @@ import mongoose from 'mongoose';
 
 import userRoutes from "./routes/user.routes"
 import jobPostRoutes from "./routes/jobPost.routes"
-
+import applyRoutes from "./routes/apply.routes"
 
 const app = express()
 const port = 3000
@@ -16,11 +16,12 @@ app.use(express.urlencoded({ extended: false }));
 //routes
 app.use("/user",userRoutes)
 app.use("/jobs",jobPostRoutes)
+app.use("/apply",applyRoutes)
 
 
 
 app.get('/', (req, res) => {
-  res.send('welcome to naukri.com')
+  res.send('welcome to naukri.com lite')
 })
 
 

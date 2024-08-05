@@ -95,10 +95,11 @@ const jobPostSchema = new Schema<IJobPost>({
     timestamps:true
 });
 
+const Application = model<IApplication>('Application', applicationSchema);
 const JobPost = model<IJobPost>('JobPost', jobPostSchema);
 
 
-export {JobPost,IJobPost};
+export {JobPost,IJobPost, Application};
 
 
 // {

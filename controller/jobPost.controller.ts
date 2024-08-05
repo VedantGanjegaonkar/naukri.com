@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction} from 'express';
 import {JobPost,IJobPost} from '../models/jobPost.model';
 import { JobPostServices } from '../services/jobPost.services';
+import{errorHandler} from "../middleware/errorhandler"
 
 export class jobPostController{
 
@@ -13,7 +14,7 @@ export class jobPostController{
         this.deleteJobPost=this.deleteJobPost.bind(this)
     }
     
-public async createJobPost(req: Request, res: Response): Promise<void>{
+public async createJobPost(req: Request, res: Response, next:NextFunction): Promise<void>{
     try {
         const jobPostData = req.body;
 
@@ -21,9 +22,8 @@ public async createJobPost(req: Request, res: Response): Promise<void>{
       
   
       res.status(201).json({ message: 'Job post created successfully', jobPost: newJobPost });
-    } catch (error) {
-      console.error('Error creating job post:', error);
-      res.status(500).json({ message: 'Failed to create job post' });
+    } catch (err:any) {
+      errorHandler(err,req,res,next)
     }
   };
 
@@ -36,8 +36,8 @@ public async deleteJobPost(req: Request, res: Response, next:NextFunction):Promi
         
         res.status(200).json({ message: 'Job post deleted successfully' });
         
-    } catch (error) {
-        res.status(500).json({ message: 'Failed to delete job post' });
+    } catch (err:any) {
+        errorHandler(err,req,res,next)
     }
 }
 }
