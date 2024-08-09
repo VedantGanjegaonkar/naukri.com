@@ -7,7 +7,6 @@ import { TYPES } from '../types';
 import { UserService } from '../services/user.services';
 
 
-
 @controller('/user')
 export class UserController {
     

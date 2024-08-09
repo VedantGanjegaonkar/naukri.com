@@ -1,22 +1,30 @@
 import { Request, Response, NextFunction} from 'express';
 import {JobPost,IJobPost} from '../models/jobPost.model';
+import mongoose from 'mongoose';
 import { JobPostServices } from '../services/jobPost.services';
 import{errorHandler} from "../middleware/errorhandler"
 import { inject } from 'inversify';
 import { TYPES } from '../types';
 import { controller, httpDelete, httpGet, httpPost } from 'inversify-express-utils';
+import { UserService } from '../services/user.services';
 
 @controller('/jobPost')
 
 export class jobPostController{
 
-    constructor(@inject(TYPES.JobPostServices) private readonly jobPostServices: JobPostServices ){}
+    constructor(@inject(TYPES.JobPostServices) private readonly jobPostServices: JobPostServices,
+    @inject(TYPES.UserService) private readonly _userService: UserService ){}
 
 
 @httpPost('/')
 public async createJobPost(req: Request, res: Response, next:NextFunction): Promise<void>{
     try {
-        const jobPostData = req.body;
+        const token=req.headers.authorization
+        const userIdStr=await this._userService.getUserId(token)
+        const recruiter=new mongoose.Types.ObjectId(userIdStr)
+        
+        const { title, description, company, location, salary, employmentType, skills, qualification, branch } = req.body;
+        const jobPostData={title, description, company, location, salary, employmentType,recruiter, skills, qualification, branch}
 
        const newJobPost= await this.jobPostServices.createJobPost(jobPostData)
       
